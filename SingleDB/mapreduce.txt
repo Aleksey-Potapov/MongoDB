@@ -1,0 +1,3 @@
+https://docs.mongodb.com/v4.2/tutorial/perform-incremental-map-reduce/
+https://www.javacodegeeks.com/2015/02/setting-up-sharded-mongodb-cluster-in-localhost.html
+https://university.mongodb.com/mercury/M103/2021_August_17/chapter/Chapter_1_The_Mongod/lesson/5e545469722931507ab1052f/problem

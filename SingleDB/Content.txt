@@ -1,0 +1,52 @@
+https://www.tandfonline.com/action/showCitFormats?doi=10.1080%2F02667363.2018.1425829
+
+export BibTex
+
+
+Content
+
+
+publicationDateType
+Date
+
+
+Title:		string
+Authors:	[string]
+Genre: 		article, journal, suplimental, book, bookchapter, preprint
+ //ContentType: strung // image, audio, pdf, video
+ParentContent : Id
+Publisher: 	string
+Created: Date
+PublicationDate: Date
+
+//Join
+PublicationDates: {
+	Print: Date
+	Preprint:Date
+	}
+
+isPreprint
+
+Language: // Title UTF-8 Название любое
+StdNum:{
+ISSN, ISBN, patent, DOI}
+pages{start,endpagenumber}
+
+
+keytitleHash
+
+Пример одного поля для всех 
+goup2 or group 3
+
+RelatedItemType
+
+JournalVolume
+JournalIssue
+BookEdition
+BookChapterNumber
+Pages
+
+SOurce collection
+
+
+triggers to update lastUpdate

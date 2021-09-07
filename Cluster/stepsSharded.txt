@@ -1,0 +1,66 @@
+
+
+https://www.javacodegeeks.com/2015/02/setting-up-sharded-mongodb-cluster-in-localhost.html
+
+cd c:\mongodb\Cluster
+
+START /B mongod -f csrs1.conf
+START /B mongod -f csrs2.conf
+
+mongo --port 26001 -host localhost
+rs.initiate() 
+rs.add("localhost:26002")
+rs.status()
+exit
+ 
+
+START /B mongod -f node1.conf
+START /B mongod -f node2.conf
+START /B mongod -f node3.conf
+
+
+START /B mongos -f mongoserver.conf
+mongo --port 26000 -host localhost 
+sh.status()
+sh.addShard("localhost:27011")
+sh.addShard("localhost:27012")
+sh.addShard("localhost:27013")
+sh.status()
+exit
+
+
+sh.enableSharding("students")
+sh.shardCollection("students.grades", {"student_id" : 1})
+
+sh.status()
+
+for ( i = 200; i < 10000; i++ ) {
+  db.grades.insert({student_id: i, type: "exam", score : Math.random() * 100 }); 
+  db.grades.insert({student_id: i, type: "quiz", score : Math.random() * 100 }); 
+  db.grades.insert({student_id: i, type: "homework", score : Math.random() * 100 });
+}
+WriteResult({ "nInserted" : 1 })
+
+sh.status()
+
+
+mongo --host localhost --port 27011
+use students
+db.grades.find().sort({student_id:1}).limit(1).pretty()
+db.grades.find().sort({student_id:-1}).limit(1).pretty()
+
+mongo --port 26000 --host localhost
+use students
+db.grades.find().sort({student_id:1}).limit(1).pretty()
+db.grades.find().sort({student_id:-1}).limit(1).pretty()
+
+1. Stop mongos routers. 
+2. Stop each shard replica set. 
+3. Stop config servers.
+
+use admin
+db.shutdownServer()
+exit
+
+ 
+ 

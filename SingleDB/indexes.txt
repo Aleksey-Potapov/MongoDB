@@ -1,0 +1,58 @@
+
+Multikey Index
+MongoDB uses multikey indexes to index the content stored in arrays. If you index a field that holds an array value, MongoDB creates separate index entries for every element of the array. These multikey indexes allow queries to select documents that contain arrays by matching on element or elements of the arrays. MongoDB automatically determines whether to create a multikey index if the indexed field contains an array value; you do not need to explicitly specify the multikey type.
+
+Text Indexes
+MongoDB provides a text index type that supports searching for string content in a collection. These text indexes do not store language-specific stop words (e.g. “the”, “a”, “or”) and stem the words in a collection to only store root words.
+
+See Text Indexes for more information on text indexes and search.
+
+Partial indexes only index the documents in a collection that meet a specified filter expression. 
+
+Sparse Indexes
+The sparse property of an index ensures that the index only contain entries for documents that have the indexed field. The index skips documents that do not have the indexed field.
+
+You can combine the sparse index option with the unique index option to prevent inserting documents that have duplicate values for the indexed field(s) and skip indexing documents that lack the indexed field(s).
+
+
+TTL Indexes
+TTL indexes are special indexes that MongoDB can use to automatically remove documents from a collection after a certain amount of time. This is ideal for certain types of information like machine generated event data, logs, and session information that only need to persist in a database for a finite amount of time.
+
+See: Expire Data from Collections by Setting TTL for implementation instructions.
+
+Collation allows users to specify language-specific rules for string comparison, such as rules for lettercase and accent marks.
+
+
+
+db.myColl.createIndex( { category: 1 }, { collation: { locale: "fr" } } )
+The following query operation, which specifies the same collation as the index, can use the index:
+
+db.myColl.find( { category: "cafe" } ).collation( { locale: "fr" } )
+
+However, the following query operation, which by default uses the “simple” binary collator, cannot use the index:
+
+db.myColl.find( { category: "cafe" } )
+
+
+Covered Queries
+When the query criteria and the projection of a query include only the indexed fields, MongoDB returns results directly from the index without scanning any documents or bringing documents into memory. These covered queries can be very efficient.
+
+
+Index Intersection
+MongoDB can use the intersection of indexes to fulfill queries. For queries that specify compound query conditions, if one index can fulfill a part of a query condition, and another index can fulfill another part of the query condition, then MongoDB can use the intersection of the two indexes to fulfill the query. Whether the use of a compound index or the use of an index intersection is more efficient depends on the particular query and the system.
+
+For details on index intersection, see Index Intersection.
+
+
+Restrictions
+Certain restrictions apply to indexes, such as the length of the index keys or the number of indexes per collection. See Index Limitations for details.
+
+https://docs.mongodb.com/v4.2/indexes/
+
+
+Collation Option
+text indexes only support simple binary comparison and do not support collation.
+
+To create a text index on a a collection that has a non-simple collation, you must explicitly specify {collation: {locale: "simple"} } when creating the index.
+
+https://docs.mongodb.com/v4.2/core/index-text/

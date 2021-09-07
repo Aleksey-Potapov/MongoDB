@@ -1,0 +1,195 @@
+Final Steps
+
+
+1. Intro
+About NoSQL
+About MongoDB
+Data formta
+CrossPlatform
+Documents instead rows
+Ket _is
+Collection
+Replications
+
+SImplicity
+Max 16Mb
+
+GridFS technology files with metadata and chunks. files are splilted on 256 kb
+
+
+ 
+
+2. Run MongoDB
+
+Download from site communit edition
+portable
+add to enviromnts varalbes Path
+
+2 Ways Run mongod
+By COmmand
+ 
+mkdir C:\mongodb\single\db
+mongod --dbpath C:\mongodb\single\db
+
+Using config file
+cd C:\Mongodb
+mkdir C:\mongodb\single\logs
+mongod -f single/singleShard.conf
+
+Path where you run mongodb matters. see paths in the config file. They are Relative
+
+3. Create collection
+
+Open Robomongo
+use singledb
+db.createCollection("content")
+
+Create collection
+Подколлекции  db.users.accounts
+db.users.renameCollection("новое_название")
+
+Insert DOcument simple
+
+db.content.insertOne( { name: "Workshop" } )
+
+Add detailes
+
+Tell about 15 Data types
+
+ABout $id and ObjectId
+
+Insert many documents
+
+ document=({"name": "Bill", "age": 32, languages: ["english", "french"]})
+  db.users.insertOne(document)
+
+
+From file
+load("D:/users.js")
+
+4. Search and Fitert
+
+
+ fn = function() { return this.name=="Tom"; }
+ db.users.find(fn)
+
+function sqrt(n) { return n*n; }
+  sqrt(5)
+  
+Groups
+db.users.find({name: "Tom"}).skip(2).count(true)
+
+db.users.distinct("name")
+
+db.users.find ({name: "Tom"}, {languages: {$slice : 1}}) взять один из массива языков
+
+ 
+var cursor = db.users.find() 
+ cursor.sort({name:1}).limit(3).skip(0).forEach(function(obj){
+ print(obj.name);
+ })
+
+by ine field
+ANd ,OR
+ db.users.find ({$or : [{name: "Tom"}, {age: {$gte:30}}]})
+ db.users.find ({$and : [{name: "Tom"}, {age: 32}]})
+options
+
+
+
+db.users.find ({age: {$gt : 30, $lt: 50}})
+
+ db.users.find ({name: {$regex:"b"}})
+  db.users.find({name:/^B\w+/i})
+
+db.users.find ({company: {$exists:true}})
+
+
+
+
+db.users.find ({age: {$type:"string"}})
+db.users.find ({age: {$type:"number"}})
+
+
+Manual  References
+Формальная схема
+{ "$ref" : название_коллекции, "$id": значение [, "$db" : название_бд ]}
+
+db.companies.insertOne({"_id" : "microsoft", year: 1974})
+db.users.insertOne({name: "Tom", age: 28, company: "microsoft"})
+user = db.users.findOne()
+db.companies.findOne({_id: user.company})
+
+
+
+
+
+
+
+Автоматическое связывание
+ google = db.companies.insertOne({name : "google", year: 1998})
+ sam = ({name: "Sam", age: 25, company: { "$ref" : "companies", "$id" : google.insertedId}})
+ db.users.insertOne(sam)
+ 
+db.companies.findOne({_id: sam.company.$id})
+
+
+"$ref"
+"$id" 
+$ - reserved
+
+
+5. Indexes
+
+ db.users.createIndex({"name" : 1}, {"unique" : true})
+db.users.createIndex({"name" : 1, "age" : 1}, {"unique" : true})
+db.users.getIndexes()
+ db.users.dropIndex("name_1")
+ 
+ Add info about indexes from off site
+ Text index, Text Langueage  
+ 
+ 
+Capped Collections
+ db.createCollection("logs", {capped:true, size:9500, max: 150})
+ 
+
+6. Map/Reduce
+
+
+Map/Reduce
+
+Reduce
+
+
+Finalize
+
+80. What is Replications
+Replica Set
+
+Reads Writes
+COncerns
+
+
+90. Sharding
+
+
+
+
+
+
+99. Utils
+
+Check perfomance 
+mongostat --port 27017
+
+mongorestore --drop --port 27017 dump/
+mongodump --port 27017 --db single --collection content
+
+
+mongoexport --port 27017 --db single --collection content -o content.json
+mongoimport --port 27017 content.json
+
+
+Show file content and compare
+

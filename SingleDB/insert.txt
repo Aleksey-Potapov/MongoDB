@@ -1,0 +1,33 @@
+db.content.insertOne(
+   { 
+       type:            "Journal",
+       title:           "Exploring how and why young people use social networking sites", 
+       authors:         ["Gray, L"],
+       publicationDate: new Date("2018-04-03"),
+       parentName:     "Educational Psychology in Practice",
+       volume:          34,
+       issue:           2,
+       pages:           {start:175, end:194},
+       ids:             {doi: "10.1080/02667363.2018.1425829"},
+       publisher:       "Routledge",
+       abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people. This study explores how and why young people are using social networking sites (SNS) and whether there are age or gender differences. A key feature of the study was that the research was built around the views and interests of young people and their advice was sought at each point of the four phase methodological process. The study finds significant gender and age differences related to how young people use SNS. An unexpected but significant finding relates to young people’s perception of SNS and how closely it is associated to their offline lives. By understanding that a large proportion of young people perceive SNS as being different to their offline lives, this study provides a new area of focus in order to effectively support young people online.",
+       createDate:      new Date()
+   })
+   
+db.content.insertOne(
+   { 
+       type:            "Journal",
+       title:           "Exploring how and why young people use social networking sites", 
+       authors:         ["Gray, L"],
+       publicationDate: new Date("2018-04-03"),
+       parentName:     "Educational Psychology in Practice",
+       volume:          NumberInt(34),
+       issue:           NumberInt(2),
+       pages:           {start:NumberInt(175), end:NumberInt(194)},
+       ids:             {doi: "10.1080/02667363.2018.1425829"},
+       publisher:       "Routledge",
+       abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people. This study explores how and why young people are using social networking sites (SNS) and whether there are age or gender differences. A key feature of the study was that the research was built around the views and interests of young people and their advice was sought at each point of the four phase methodological process. The study finds significant gender and age differences related to how young people use SNS. An unexpected but significant finding relates to young people’s perception of SNS and how closely it is associated to their offline lives. By understanding that a large proportion of young people perceive SNS as being different to their offline lives, this study provides a new area of focus in order to effectively support young people online.",
+       createDate:      new Date()
+   })
+   
+
