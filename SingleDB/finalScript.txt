@@ -99,6 +99,9 @@ By Type
 db.content.find ({issue: {$type:"string"}}) 
 
 
+4.5 Update existing records!!!
+pubdates - preprint, print ,electronics
+
 5 Groups and Aggregation
 
 db.content.distinct("publisher")

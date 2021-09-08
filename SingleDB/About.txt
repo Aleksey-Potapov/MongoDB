@@ -3,7 +3,7 @@ About MongoDB
 Data formta
 CrossPlatform
 Documents instead rows
- 
+ https://phoenixnap.com/kb/cassandra-vs-mongodb
 Collection
 Replications
 
@@ -18,6 +18,27 @@ Add detailes
 Tell about 15 Data types
 
 About $id and ObjectId
+
+
+
+
+Presentation
+
+MOngo  and SQL and Elastic on graphic
+MOngoDB cluster horizontal scaling
+
+Document Types
+
+ObjectID contains
+
+MapReduce arrayes
+
+
+Sharding Replica Config servser
+
+Write Read concerns
+
+
 
 
 
