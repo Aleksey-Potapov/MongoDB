@@ -1,51 +1,35 @@
- 
-
 
 1. Intro
 
-
 2. Run MongoDB
+Server
+Download community edition 4.2 (zip) from off site 
+Unpack and add Bin to Paths
 
-Download from site communit edition
-portable
-add to enviromnts varalbes Path
+Client
+Download and install Robo 3T only
 
-2 Ways Run mongod
-By COmmand
- 
-mkdir C:\mongodb\single\db
-mongod --dbpath C:\mongodb\single\db
+Run mongod by command
 
-Using config file
-cd C:\Mongodb
+
+mkdir C:\mongodb\single\instance
+mongod --dbpath C:\mongodb\single\instance
+
+Using the config file
+cd C:\mongodb
 mkdir C:\mongodb\single\logs
 mongod -f single/singleShard.conf
 
-Path where you run mongodb matters. see paths in the config file. They are Relative
-
 3. Create collection
 
-Open Robomongo
+Open Robo 3T
 use singledb
+
 db.createCollection("users")
 
-Create collection
-Подколлекции  db.users.accounts
 db.users.renameCollection("user")
 
-Insert Document simple
-
 db.user.insertOne( { name: "Workshop" } )
-
-Add detailes
-
-Tell about 15 Data types
-
-ABout $id and ObjectId
-
-
- document=({"name": "Bill", "age": 32, languages: ["english", "french"]})
-  db.user.insertOne(document)
 
 db.content.insertOne(
    { 
@@ -109,7 +93,7 @@ By Type
 db.content.find ({issue: {$type:"string"}}) 
 
 
-4.3 Groups and Aggregation
+5 Groups and Aggregation
 
 db.content.distinct("publisher")
 
@@ -142,7 +126,7 @@ db.content.aggregate([
    
 
 
-5. Indexes
+6. Indexes
  
  db.getCollection('content').find({title:/teacher/i})
  db.getCollection('content').find({title:/teacher/i}).explain()
@@ -208,7 +192,7 @@ for (var i = 1; i <= 1000; ++i) {
 
 
 
-6. Map/Reduce
+7. Map/Reduce
 
 
  fn = function() { return this.name=="Tom"; }
