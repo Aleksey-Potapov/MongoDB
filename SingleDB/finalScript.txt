@@ -58,28 +58,54 @@ Tell about 15 Data types
 
 ABout $id and ObjectId
 
-Insert many documents
 
  document=({"name": "Bill", "age": 32, languages: ["english", "french"]})
   db.users.insertOne(document)
 
+db.content.insertOne(
+   { 
+       type:            "Journal",
+       title:           "Exploring how and why young people use social networking sites", 
+       authors:         ["Gray, L"],
+       publicationDate: new Date("2018-04-03"),
+       parentName:     "Educational Psychology in Practice",
+       volume:          NumberInt(34),
+       issue:           NumberInt(2),
+       pages:           {start:NumberInt(175), end:NumberInt(194)},
+       ids:             {doi: "10.1080/02667363.2018.1425829"},
+       publisher:       "Routledge",
+       abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
+       createDate:      new Date()
+   })
 
 From file
 load("D:/users.js")
 
-4. Search and Fitert
+   
+Insert many documents from Journals10
+
+load("C:/MongoDB/scripts/SingleDB/journals-10.txt")
 
 
- fn = function() { return this.name=="Tom"; }
- db.users.find(fn)
+4. Search and Filtert
 
-function sqrt(n) { return n*n; }
-  sqrt(5)
-  
+db.content.find({ type: "Journal" 
+, publisher : "Routledge"
+,parentName: "Educational Psychology in Practice"}).limit(2) 
+
+db.content.find( { type: "Journal" 
+, publisher : "Routledge"} )
+
 Groups
-db.users.find({name: "Tom"}).skip(2).count(true)
+ 
+db.content.distinct("publisher")
 
-db.users.distinct("name")
+
+
+ db.content.find({parentName: "Educational Psychology in Practice"}
+ ,{title: true, _id: false}).limit(2) 
+
+ 
 
 db.users.find ({name: "Tom"}, {languages: {$slice : 1}}) взять один из массива языков
 
@@ -99,16 +125,13 @@ options
 
 db.users.find ({age: {$gt : 30, $lt: 50}})
 
- db.users.find ({name: {$regex:"b"}})
-  db.users.find({name:/^B\w+/i})
-
-db.users.find ({company: {$exists:true}})
-
-
+db.users.find ({name: {$regex:"b"}}) 
+db.content.find({abstracts:/adult/i})
+  
+db.content.find ({name: {$exists:true}})
 
 
-db.users.find ({age: {$type:"string"}})
-db.users.find ({age: {$type:"number"}})
+db.content.find ({issue: {$type:"string"}}) 
 
 
 Manual  References
@@ -121,15 +144,11 @@ user = db.users.findOne()
 db.companies.findOne({_id: user.company})
 
 
-
-
-
-
-
+ 
 Автоматическое связывание
- google = db.companies.insertOne({name : "google", year: 1998})
- sam = ({name: "Sam", age: 25, company: { "$ref" : "companies", "$id" : google.insertedId}})
- db.users.insertOne(sam)
+google = db.companies.insertOne({name : "google", year: 1998})
+sam = ({name: "Sam", age: 25, company: { "$ref" : "companies", "$id" : google.insertedId}})
+db.users.insertOne(sam)
  
 db.companies.findOne({_id: sam.company.$id})
 
@@ -140,23 +159,72 @@ $ - reserved
 
 
 5. Indexes
-
- db.users.createIndex({"name" : 1}, {"unique" : true})
-db.users.createIndex({"name" : 1, "age" : 1}, {"unique" : true})
-db.users.getIndexes()
- db.users.dropIndex("name_1")
+ 
+ db.getCollection('content').find({title:/adult/i}).explain()
+ db.content.createIndex({"title" : 1}, {"unique" : false}) 
+  db.getCollection('content').find({title:/adult/i}).explain()
+  
+   
+db.content.getIndexes()
+ db.users.dropIndex("titile_1")
  
  Add info about indexes from off site
  Text index, Text Langueage  
+  db.content.createIndex({"abstracts" : "text"} )
+db.content.find( { $text: { $search: "adult or child" } } ).explain()
  
+ Exact Phrase ini quotas
+ 
+ db.stores.find( { $text: { $search: "\"coffee shop\"" } } )
+ 
+ Term Exclusion
+ 
+ db.stores.find( { $text: { $search: "java shop -coffee" } } )
+ 
+ Sorting
+ To sort the results in order of relevance score, you must explicitly project the $meta textScore field and sort on it:
+
+db.stores.find(
+   { $text: { $search: "java coffee shop" } },
+   { score: { $meta: "textScore" } }
+).sort( { score: { $meta: "textScore" } } )
+
+
+Aggregation
+
+db.articles.aggregate(
+   [
+     { $match: { $text: { $search: "cake" } } },
+     { $group: { _id: null, views: { $sum: "$views" } } }
+   ]
+)
+ 
+ 
+ db.articles.aggregate(
+   [
+     { $match: { $text: { $search: "cake tea" } } },
+     { $project: { title: 1, _id: 0, score: { $meta: "textScore" } } },
+     { $match: { score: { $gt: 1.0 } } }
+   ]
+)
+
+
  
 Capped Collections
  db.createCollection("logs", {capped:true, size:9500, max: 150})
+ 
  
 
 6. Map/Reduce
 
 
+ fn = function() { return this.name=="Tom"; }
+ db.users.find(fn)
+
+function sqrt(n) { return n*n; }
+  sqrt(5)
+  
+  
 Map/Reduce
 
 Reduce
