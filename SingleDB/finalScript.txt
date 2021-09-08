@@ -1,6 +1,12 @@
 
 1. Intro
 
+Take Descrption from MongoDb Labs
+About Replicatoin
+
+
+Get repository to C:\mongodb\scripts
+
 2. Run MongoDB
 Server
 Download community edition 4.2 (zip) from off site 
@@ -18,7 +24,7 @@ mongod --dbpath C:\mongodb\single\instance
 Using the config file
 cd C:\mongodb
 mkdir C:\mongodb\single\logs
-mongod -f single/singleShard.conf
+mongod -f singledb/singleShard.conf
 
 3. Create collection
 
@@ -124,7 +130,7 @@ db.content.aggregate([
   }
 ])
    
-
+LINQ for IQueryable
 
 6. Indexes
  
@@ -194,6 +200,7 @@ for (var i = 1; i <= 1000; ++i) {
 
 7. Map/Reduce
 
+https://docs.mongodb.com/manual/tutorial/perform-incremental-map-reduce/
 
  fn = function() { return this.name=="Tom"; }
  db.users.find(fn)
@@ -283,6 +290,7 @@ db.usersessions.aggregate([
       whenNotMatched: "insert"
    }}
 ])
+
 
 
 80.  Replication

@@ -1,8 +1,12 @@
-
-
-https://www.javacodegeeks.com/2015/02/setting-up-sharded-mongodb-cluster-in-localhost.html
-
+https://university.mongodb.com/mercury/M103/2021_August_17/chapter/Chapter_2_Replication/lesson/5a9b3d3297182d4140a45eaa/lecture
+  
 cd c:\mongodb\Cluster
+mkdir c:\mongodb\Cluster\db\csrs1
+mkdir c:\mongodb\Cluster\db\csrs2
+mkdir c:\mongodb\Cluster\db\node1
+mkdir c:\mongodb\Cluster\db\node2
+mkdir c:\mongodb\Cluster\db\node3
+mkdir c:\mongodb\Cluster\db\mongoserver
 
 START /B mongod -f csrs1.conf
 START /B mongod -f csrs2.conf
@@ -53,6 +57,12 @@ mongo --port 26000 --host localhost
 use students
 db.grades.find().sort({student_id:1}).limit(1).pretty()
 db.grades.find().sort({student_id:-1}).limit(1).pretty()
+
+
+
+Write Concern
+
+
 
 1. Stop mongos routers. 
 2. Stop each shard replica set. 
