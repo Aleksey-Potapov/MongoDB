@@ -1,23 +1,8 @@
-Final Steps
+ 
 
 
 1. Intro
-About NoSQL
-About MongoDB
-Data formta
-CrossPlatform
-Documents instead rows
-Ket _is
-Collection
-Replications
 
-SImplicity
-Max 16Mb
-
-GridFS technology files with metadata and chunks. files are splilted on 256 kb
-
-
- 
 
 2. Run MongoDB
 
@@ -42,15 +27,15 @@ Path where you run mongodb matters. see paths in the config file. They are Relat
 
 Open Robomongo
 use singledb
-db.createCollection("content")
+db.createCollection("users")
 
 Create collection
 Подколлекции  db.users.accounts
-db.users.renameCollection("новое_название")
+db.users.renameCollection("user")
 
-Insert DOcument simple
+Insert Document simple
 
-db.content.insertOne( { name: "Workshop" } )
+db.user.insertOne( { name: "Workshop" } )
 
 Add detailes
 
@@ -60,7 +45,7 @@ ABout $id and ObjectId
 
 
  document=({"name": "Bill", "age": 32, languages: ["english", "french"]})
-  db.users.insertOne(document)
+  db.user.insertOne(document)
 
 db.content.insertOne(
    { 
@@ -76,144 +61,152 @@ db.content.insertOne(
        publisher:       "Routledge",
        abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
        createDate:      new Date()
-   })
+})
 
-From file
-load("D:/users.js")
-
-   
+From files   
 Insert many documents from Journals10
-
 load("C:/MongoDB/scripts/SingleDB/journals-10.txt")
 
 
-4. Search and Filtert
-
-db.content.find({ type: "Journal" 
-, publisher : "Routledge"
-,parentName: "Educational Psychology in Practice"}).limit(2) 
+4. Search and Filters
 
 db.content.find( { type: "Journal" 
 , publisher : "Routledge"} )
 
-Groups
- 
-db.content.distinct("publisher")
+db.content.find({ type: "Journal" 
+, publisher : "Routledge"
+, parentName: "Educational Psychology in Practice"}).limit(2) 
+
+Greater
+db.content.find({ type: "Journal" 
+, publisher : "Routledge"
+, "pages.start":  {$gte: 454}
+}) 
 
 
+OR
+ db.content.find({ type: "Journal" 
+, publisher : "Routledge"
+, $or : [ {"pages.start":{$gte: 454}} ,{"pages.start": {$lt:10}}]
+ }
+)  
 
+Take less fields
  db.content.find({parentName: "Educational Psychology in Practice"}
- ,{title: true, _id: false}).limit(2) 
-
+ ,{title: true, _id: false}) 
  
 
-db.users.find ({name: "Tom"}, {languages: {$slice : 1}}) взять один из массива языков
+Limit array 
+db.content.find ({ },{authors: {$slice : 1}})
 
- 
-var cursor = db.users.find() 
- cursor.sort({name:1}).limit(3).skip(0).forEach(function(obj){
- print(obj.name);
- })
+Regexp
+db.content.find ({abstracts: {$regex:"teacher"}}) 
+db.content.find({abstracts:/teacher/i})
 
-by ine field
-ANd ,OR
- db.users.find ({$or : [{name: "Tom"}, {age: {$gte:30}}]})
- db.users.find ({$and : [{name: "Tom"}, {age: 32}]})
-options
-
-
-
-db.users.find ({age: {$gt : 30, $lt: 50}})
-
-db.users.find ({name: {$regex:"b"}}) 
-db.content.find({abstracts:/adult/i})
-  
+Existance
 db.content.find ({name: {$exists:true}})
-
-
+By Type
 db.content.find ({issue: {$type:"string"}}) 
 
 
-Manual  References
-Формальная схема
-{ "$ref" : название_коллекции, "$id": значение [, "$db" : название_бд ]}
+4.3 Groups and Aggregation
 
-db.companies.insertOne({"_id" : "microsoft", year: 1974})
-db.users.insertOne({name: "Tom", age: 28, company: "microsoft"})
-user = db.users.findOne()
-db.companies.findOne({_id: user.company})
+db.content.distinct("publisher")
 
-
- 
-Автоматическое связывание
-google = db.companies.insertOne({name : "google", year: 1998})
-sam = ({name: "Sam", age: 25, company: { "$ref" : "companies", "$id" : google.insertedId}})
-db.users.insertOne(sam)
- 
-db.companies.findOne({_id: sam.company.$id})
+db.content.aggregate([
+  {
+    $group: {
+      _id: "$publisher",
+      sampleTitle: { $first : "$title" }
+    }
+  },
+  {
+    $sort:{ _id : 1 }
+  }
+])
 
 
-"$ref"
-"$id" 
-$ - reserved
+db.content.aggregate([
+  {
+    $group: {
+      _id:   {"publisher": "$publisher",
+               "Parent": "$parentName"},
+      sample: { $first : "$title" },
+	  count: { $sum: 1 }
+    }
+  },
+  {
+    $sort:{ _id : 1 }
+  }
+])
+   
 
 
 5. Indexes
  
- db.getCollection('content').find({title:/adult/i}).explain()
+ db.getCollection('content').find({title:/teacher/i})
+ db.getCollection('content').find({title:/teacher/i}).explain()
+ 
  db.content.createIndex({"title" : 1}, {"unique" : false}) 
-  db.getCollection('content').find({title:/adult/i}).explain()
+  
+db.getCollection('content').find({title:/teacher/i}).explain()
   
    
 db.content.getIndexes()
  db.users.dropIndex("titile_1")
- 
- Add info about indexes from off site
+  
  Text index, Text Langueage  
   db.content.createIndex({"abstracts" : "text"} )
-db.content.find( { $text: { $search: "adult or child" } } ).explain()
+  
+ db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
  
  Exact Phrase ini quotas
  
- db.stores.find( { $text: { $search: "\"coffee shop\"" } } )
+ db.content.find( { $text: { $search: "\"an active listening\"" } } ) 
+db.content.find( { $text: { $search: "an active listening" } } ) 
+ 
  
  Term Exclusion
  
- db.stores.find( { $text: { $search: "java shop -coffee" } } )
+ db.content.find( { $text: { $search: "adult learn -pain" } } )
+ 
  
  Sorting
  To sort the results in order of relevance score, you must explicitly project the $meta textScore field and sort on it:
 
-db.stores.find(
-   { $text: { $search: "java coffee shop" } },
+
+db.content.find(
+   { $text: { $search: "article learn" } },
    { score: { $meta: "textScore" } }
 ).sort( { score: { $meta: "textScore" } } )
 
 
-Aggregation
-
-db.articles.aggregate(
+Take only best match
+db.content.aggregate(
    [
-     { $match: { $text: { $search: "cake" } } },
-     { $group: { _id: null, views: { $sum: "$views" } } }
-   ]
-)
- 
- 
- db.articles.aggregate(
-   [
-     { $match: { $text: { $search: "cake tea" } } },
+     { $match: { $text: { $search: "article learn" } } },
      { $project: { title: 1, _id: 0, score: { $meta: "textScore" } } },
      { $match: { score: { $gt: 1.0 } } }
    ]
 )
 
+Check the indexes usage.
+db.content.aggregate( [ { $indexStats: { } } ] )
 
+ 
  
 Capped Collections
  db.createCollection("logs", {capped:true, size:9500, max: 150})
  
  
+for (var i = 1; i <= 1000; ++i) {
+  db.logs.insert({ 
+      creationDate: new Date(),
+      uid: i
+  });
+}
+
+
 
 6. Map/Reduce
 
@@ -227,16 +220,105 @@ function sqrt(n) { return n*n; }
   
 Map/Reduce
 
-Reduce
+db.usersessions.insertMany([
+   { userid: "a", start: ISODate('2020-03-03 14:17:00'), length: 95 },
+   { userid: "b", start: ISODate('2020-03-03 14:23:00'), length: 110 },
+   { userid: "c", start: ISODate('2020-03-03 15:02:00'), length: 120 },
+   { userid: "d", start: ISODate('2020-03-03 16:45:00'), length: 45 },
+   { userid: "a", start: ISODate('2020-03-04 11:05:00'), length: 105 },
+   { userid: "b", start: ISODate('2020-03-04 13:14:00'), length: 120 },
+   { userid: "c", start: ISODate('2020-03-04 17:00:00'), length: 130 },
+   { userid: "d", start: ISODate('2020-03-04 15:37:00'), length: 65 }
+])
+
+#Map
+var mapFunction = function() {
+    var key = this.userid;
+    var value = { total_time: this.length, count: 1, avg_time: 0 };
+    emit( key, value );
+};
+
+#Reduce
+
+var reduceFunction = function(key, values) {
+   var reducedObject = { total_time: 0, count:0, avg_time:0 };
+   values.forEach(function(value) {
+      reducedObject.total_time += value.total_time;
+      reducedObject.count += value.count;
+   });
+   return reducedObject;
+};
+
+var finalizeFunction = function(key, reducedValue) {
+   if (reducedValue.count > 0)
+      reducedValue.avg_time = reducedValue.total_time / reducedValue.count;
+   return reducedValue;
+};
+
+db.usersessions.mapReduce(
+   mapFunction,
+   reduceFunction,
+   {
+     out: "session_stats",
+     finalize: finalizeFunction
+   }
+)
+
+db.session_stats.find().sort( { _id: 1 } )
+
+db.usersessions.insertMany([
+   { userid: "a", ts: ISODate('2020-03-05 14:17:00'), length: 130 },
+   { userid: "b", ts: ISODate('2020-03-05 14:23:00'), length: 40 },
+   { userid: "c", ts: ISODate('2020-03-05 15:02:00'), length: 110 },
+   { userid: "d", ts: ISODate('2020-03-05 16:45:00'), length: 100 }
+])
+
+db.usersessions.mapReduce(
+   mapFunction,
+   reduceFunction,
+   {
+     query: { ts: { $gte: ISODate('2020-03-05 00:00:00') } },
+     out: { reduce: "session_stats" },
+     finalize: finalizeFunction
+   }
+);
 
 
-Finalize
 
-80. What is Replications
+db.usersessions.aggregate([
+   { $match: { ts: { $gte: ISODate('2020-03-05 00:00:00') } } },
+   { $group: { _id: "$userid", total_time: { $sum: "$length" }, count: { $sum: 1 }, avg_time: { $avg: "$length" } } },
+   { $project: { value: { total_time: "$total_time", count: "$count", avg_time: "$avg_time" } } },
+   { $merge: {
+      into: "session_stats_agg",
+      whenMatched: [ { $set: {
+         "value.total_time": { $add: [ "$value.total_time", "$$new.value.total_time" ] },
+         "value.count": { $add: [ "$value.count", "$$new.value.count" ] },
+         "value.avg_time": { $divide: [ { $add: [ "$value.total_time", "$$new.value.total_time" ] },  { $add: [ "$value.count", "$$new.value.count" ] } ] }
+      } } ],
+      whenNotMatched: "insert"
+   }}
+])
+
+
+80.  Replication
 Replica Set
 
-Reads Writes
-COncerns
+Reads Concerns
+
+db.getCollection('content').find({}).readConcern("linearizable").maxTimeMS(10000)
+
+0, 1, majority
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: "majority" , wtimeout: 5000 } }
+)
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: 2, wtimeout: 5000 } }
+)
 
 
 90. Sharding
