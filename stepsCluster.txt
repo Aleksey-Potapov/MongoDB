@@ -1,5 +1,4 @@
-https://university.mongodb.com/mercury/M103/2021_August_17/chapter/Chapter_2_Replication/lesson/5a9b3d3297182d4140a45eaa/lecture
-  
+
 cd c:\mongodb\Cluster
 mkdir c:\mongodb\Cluster\db\csrs1
 mkdir c:\mongodb\Cluster\db\csrs2
@@ -60,9 +59,26 @@ db.grades.find().sort({student_id:-1}).limit(1).pretty()
 
 
 
-Write Concern
+###Write Concern
 
 
+
+db.getCollection('content').find({}).readConcern("linearizable").maxTimeMS(10000)
+
+0, 1, majority
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: "majority" , wtimeout: 5000 } }
+)
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: 2, wtimeout: 5000 } }
+)
+ 
+ 
+Reads Concerns
 
 1. Stop mongos routers. 
 2. Stop each shard replica set. 

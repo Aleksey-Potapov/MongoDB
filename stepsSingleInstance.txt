@@ -1,10 +1,6 @@
 
 1. Intro
 
-Take Descrption from MongoDb Labs
-About Replicatoin
-
-
 Get repository to C:\mongodb\scripts
 
 2. Run MongoDB
@@ -153,7 +149,7 @@ db.content.getIndexes()
   
  db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
  
- Exact Phrase ini quotas
+ Exact Phrase in quotas
  
  db.content.find( { $text: { $search: "\"an active listening\"" } } ) 
 db.content.find( { $text: { $search: "an active listening" } } ) 
@@ -296,33 +292,7 @@ db.usersessions.aggregate([
 
 
 
-80.  Replication
-Replica Set
-
-Reads Concerns
-
-db.getCollection('content').find({}).readConcern("linearizable").maxTimeMS(10000)
-
-0, 1, majority
-
-db.products.insert(
-   { item: "envelopes", qty : 100, type: "Clasp" },
-   { writeConcern: { w: "majority" , wtimeout: 5000 } }
-)
-
-db.products.insert(
-   { item: "envelopes", qty : 100, type: "Clasp" },
-   { writeConcern: { w: 2, wtimeout: 5000 } }
-)
-
-
-90. Sharding
-
-
-
-
-
-
+ 
 99. Utils
 
 Check perfomance 
@@ -335,6 +305,5 @@ mongodump --port 27017 --db single --collection content
 mongoexport --port 27017 --db single --collection content -o content.json
 mongoimport --port 27017 content.json
 
-
-Show file content and compare
+ 
 
