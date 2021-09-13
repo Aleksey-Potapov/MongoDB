@@ -20,7 +20,7 @@ mongod --dbpath C:\mongodb\single\instance
 Using the config file
 cd C:\mongodb
 mkdir C:\mongodb\single\logs
-mongod -f singledb/singleShard.conf
+mongod -f C:\mongodb\scripts\singledb\singleShard.conf
 
 3. Create collection
 
@@ -49,9 +49,9 @@ db.content.insertOne(
        createDate:      new Date()
 })
 
-From files   
-Insert many documents from Journals10
-load("C:/MongoDB/scripts/SingleDB/journals-10.txt")
+  
+//Insert many documents from Journals10
+load("C:/MongoDB/Scripts/journalsInsert.js")
 
 
 4. Search and Filters
@@ -63,40 +63,44 @@ db.content.find({ type: "Journal"
 , publisher : "Routledge"
 , parentName: "Educational Psychology in Practice"}).limit(2) 
 
-Greater
+//Greater
 db.content.find({ type: "Journal" 
 , publisher : "Routledge"
 , "pages.start":  {$gte: 454}
 }) 
 
 
-OR
+//OR
  db.content.find({ type: "Journal" 
 , publisher : "Routledge"
 , $or : [ {"pages.start":{$gte: 454}} ,{"pages.start": {$lt:10}}]
  }
 )  
 
-Take less fields
+//Take less fields
  db.content.find({parentName: "Educational Psychology in Practice"}
  ,{title: true, _id: false}) 
  
 
-Limit array 
+//Limit array 
 db.content.find ({ },{authors: {$slice : 1}})
 
-Regexp
+//Regexp
 db.content.find ({abstracts: {$regex:"teacher"}}) 
 db.content.find({abstracts:/teacher/i})
 
-Existance
+//Existance
 db.content.find ({name: {$exists:true}})
-By Type
+//By Type
 db.content.find ({issue: {$type:"string"}}) 
 
 
 4.5 Update existing records!!!
 pubdates - preprint, print ,electronics
+
+
+
+
 
 5 Groups and Aggregation
 
@@ -133,35 +137,35 @@ LINQ for IQueryable
 
 6. Indexes
  
- db.getCollection('content').find({title:/teacher/i})
- db.getCollection('content').find({title:/teacher/i}).explain()
+db.getCollection('content').find({title:/teacher/i})
+db.getCollection('content').find({title:/teacher/i}).explain()
  
- db.content.createIndex({"title" : 1}, {"unique" : false}) 
+db.content.createIndex({"title" : 1}, {"unique" : false}) 
   
 db.getCollection('content').find({title:/teacher/i}).explain()
   
    
 db.content.getIndexes()
- db.users.dropIndex("titile_1")
+db.users.dropIndex("titile_1")
   
- Text index, Text Langueage  
-  db.content.createIndex({"abstracts" : "text"} )
+//Text index, Text Langueage  
+db.content.createIndex({"abstracts" : "text"} )
   
- db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
+db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
  
- Exact Phrase in quotas
+//Exact Phrase in quotas
  
- db.content.find( { $text: { $search: "\"an active listening\"" } } ) 
+db.content.find( { $text: { $search: "\"an active listening\"" } } ) 
 db.content.find( { $text: { $search: "an active listening" } } ) 
  
  
- Term Exclusion
+//Term Exclusion
  
- db.content.find( { $text: { $search: "adult learn -pain" } } )
+db.content.find( { $text: { $search: "adult learn -pain" } } )
  
  
- Sorting
- To sort the results in order of relevance score, you must explicitly project the $meta textScore field and sort on it:
+//Sorting
+//To sort the results in order of relevance score, you must explicitly project the $meta textScore //field and sort on it:
 
 
 db.content.find(
@@ -170,7 +174,7 @@ db.content.find(
 ).sort( { score: { $meta: "textScore" } } )
 
 
-Take only best match
+//Take only best match
 db.content.aggregate(
    [
      { $match: { $text: { $search: "article learn" } } },
@@ -179,13 +183,13 @@ db.content.aggregate(
    ]
 )
 
-Check the indexes usage.
+//Check the indexes usage.
 db.content.aggregate( [ { $indexStats: { } } ] )
 
  
  
-Capped Collections
- db.createCollection("logs", {capped:true, size:9500, max: 150})
+//Capped Collections
+db.createCollection("logs", {capped:true, size:9500, max: 150})
  
  
 for (var i = 1; i <= 1000; ++i) {
@@ -197,10 +201,9 @@ for (var i = 1; i <= 1000; ++i) {
 
 
 
-7. Map/Reduce
+7. Map/Reduce Functions 
 
-https://docs.mongodb.com/manual/tutorial/perform-incremental-map-reduce/
-
+//Store and Load functions
  fn = function() { return this.name=="Tom"; }
  db.users.find(fn)
 
@@ -208,7 +211,7 @@ function sqrt(n) { return n*n; }
   sqrt(5)
   
   
-Map/Reduce
+//Map/Reduce
 
 db.usersessions.insertMany([
    { userid: "a", start: ISODate('2020-03-03 14:17:00'), length: 95 },
@@ -221,14 +224,14 @@ db.usersessions.insertMany([
    { userid: "d", start: ISODate('2020-03-04 15:37:00'), length: 65 }
 ])
 
-#Map
+//Map
 var mapFunction = function() {
     var key = this.userid;
     var value = { total_time: this.length, count: 1, avg_time: 0 };
     emit( key, value );
 };
 
-#Reduce
+//Reduce
 
 var reduceFunction = function(key, values) {
    var reducedObject = { total_time: 0, count:0, avg_time:0 };
@@ -276,7 +279,7 @@ db.usersessions.mapReduce(
 
 
 db.usersessions.aggregate([
-   { $match: { ts: { $gte: ISODate('2020-03-05 00:00:00') } } },
+  // { $match: { ts: { $gte: ISODate('2020-03-05 00:00:00') } } },
    { $group: { _id: "$userid", total_time: { $sum: "$length" }, count: { $sum: 1 }, avg_time: { $avg: "$length" } } },
    { $project: { value: { total_time: "$total_time", count: "$count", avg_time: "$avg_time" } } },
    { $merge: {
@@ -298,11 +301,13 @@ db.usersessions.aggregate([
 Check perfomance 
 mongostat --port 27017
 
+mkdir c:\mongodb\backup
+cd c:\mongodb\backup
+mongodump --port 27017 --db singledb --collection content
 mongorestore --drop --port 27017 dump/
-mongodump --port 27017 --db single --collection content
 
 
-mongoexport --port 27017 --db single --collection content -o content.json
+mongoexport --port 27017 --db singledb --collection content -o content.json
 mongoimport --port 27017 content.json
 
  
