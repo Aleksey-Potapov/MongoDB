@@ -1,14 +1,16 @@
 
-cd c:\mongodb\Cluster
 mkdir c:\mongodb\Cluster\db\csrs1
 mkdir c:\mongodb\Cluster\db\csrs2
 mkdir c:\mongodb\Cluster\db\node1
 mkdir c:\mongodb\Cluster\db\node2
 mkdir c:\mongodb\Cluster\db\node3
 mkdir c:\mongodb\Cluster\db\mongoserver
+mkdir c:\mongodb\Cluster\logs
 
-START /B mongod -f csrs1.conf
-START /B mongod -f csrs2.conf
+cd c:\mongodb\Cluster
+
+START /B mongod -f c:\mongodb\scripts\cluster\csrs1.conf
+START /B mongod -f c:\mongodb\scripts\cluster\csrs2.conf
 
 mongo --port 26001 -host localhost
 rs.initiate() 
@@ -17,12 +19,12 @@ rs.status()
 exit
  
 
-START /B mongod -f node1.conf
-START /B mongod -f node2.conf
-START /B mongod -f node3.conf
+START /B mongod -f  c:\mongodb\scripts\cluster\node1.conf
+START /B mongod -f  c:\mongodb\scripts\cluster\node2.conf
+START /B mongod -f  c:\mongodb\scripts\cluster\node3.conf
 
 
-START /B mongos -f mongoserver.conf
+START /B mongos -f c:\mongodb\scripts\cluster\mongoserver.conf
 mongo --port 26000 -host localhost 
 sh.status()
 sh.addShard("localhost:27011")
@@ -31,20 +33,40 @@ sh.addShard("localhost:27013")
 sh.status()
 exit
 
+// Run Robomongo Shell
+// Connetc to localhost:26000
+
+use students
 
 sh.enableSharding("students")
+
+//Starting in version 4.4, MongoDB removes the limit on the shard key size.
+//For MongoDB 4.2 and earlier, a shard key cannot exceed 512 bytes.
+
 sh.shardCollection("students.grades", {"student_id" : 1})
 
 sh.status()
 
-for ( i = 200; i < 10000; i++ ) {
+use students
+db.grades.createIndex( { student_id: 1 } );
+
+
+for ( i = 200; i < 100000; i++ ) {
   db.grades.insert({student_id: i, type: "exam", score : Math.random() * 100 }); 
   db.grades.insert({student_id: i, type: "quiz", score : Math.random() * 100 }); 
   db.grades.insert({student_id: i, type: "homework", score : Math.random() * 100 });
 }
-WriteResult({ "nInserted" : 1 })
+
+db.grades.getShardDistribution()
+
+sh.startBalancer()
+
+
 
 sh.status()
+
+
+
 
 
 mongo --host localhost --port 27011
@@ -58,6 +80,10 @@ db.grades.find().sort({student_id:1}).limit(1).pretty()
 db.grades.find().sort({student_id:-1}).limit(1).pretty()
 
 
+use config
+db.settings.find()
+
+db.settings.save( { _id:"chunksize", value: 10 } )
 
 ###Write Concern
 
