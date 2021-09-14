@@ -88,18 +88,19 @@ db.content.find ({ },{authors: {$slice : 1}})
 //Regexp
 db.content.find ({abstracts: {$regex:"teacher"}}) 
 db.content.find({abstracts:/teacher/i})
+ 
+4.5 Update existing records
 
-//Existance
-db.content.find ({name: {$exists:true}})
-//By Type
-db.content.find ({issue: {$type:"string"}}) 
-
-
-4.5 Update existing records!!!
-pubdates - preprint, print ,electronics
-
-
-
+db.content.updateMany(
+   {
+     publicationDate: { $exists: true },
+     publicationDate: { $type: "date" }},
+   [
+     { $set: { "publicationDates.print": "$publicationDate" }},
+     { $unset: "publicationDate"}
+   ],
+   {$currentDate: { lastModified: true }}   
+)
 
 
 5 Groups and Aggregation
