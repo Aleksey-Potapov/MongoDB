@@ -7,10 +7,10 @@ mkdir c:\mongodb\Cluster\db\node3
 mkdir c:\mongodb\Cluster\db\mongoserver
 mkdir c:\mongodb\Cluster\logs
 
-cd c:\mongodb\Cluster
+cd c:\mongodb\scripts
 
-START /B mongod -f c:\mongodb\scripts\cluster\csrs1.conf
-START /B mongod -f c:\mongodb\scripts\cluster\csrs2.conf
+START /B mongod -f  cluster\csrs1.conf
+START /B mongod -f  cluster\csrs2.conf
 
 mongo --port 26001 -host localhost
 rs.initiate() 
@@ -19,18 +19,20 @@ rs.status()
 exit
  
 
-START /B mongod -f  c:\mongodb\scripts\cluster\node1.conf
-START /B mongod -f  c:\mongodb\scripts\cluster\node2.conf
-START /B mongod -f  c:\mongodb\scripts\cluster\node3.conf
+START /B mongod -f   cluster\node1.conf
+START /B mongod -f   cluster\node2.conf
+START /B mongod -f   cluster\node3.conf
 
 
-START /B mongos -f c:\mongodb\scripts\cluster\mongoserver.conf
+START /B mongos -f  cluster\mongoserver.conf
 mongo --port 26000 -host localhost 
 sh.status()
 sh.addShard("localhost:27011")
 sh.addShard("localhost:27012")
 sh.addShard("localhost:27013")
 sh.status()
+use config 
+db.settings.insertOne( { _id:"chunksize", value:  5 } )
 exit
 
 // Run Robomongo Shell
@@ -51,24 +53,26 @@ use students
 db.grades.createIndex( { student_id: 1 } );
 
 
-for ( i = 200; i < 100000; i++ ) {
+for ( i = 0; i < 10000; i++ ) {
   db.grades.insert({student_id: i, type: "exam", score : Math.random() * 100 }); 
   db.grades.insert({student_id: i, type: "quiz", score : Math.random() * 100 }); 
   db.grades.insert({student_id: i, type: "homework", score : Math.random() * 100 });
 }
 
+
+//Check the speed in the new window
+mongostat --port 26000 
+
+
 db.grades.getShardDistribution()
 
 sh.startBalancer()
-
-
 
 sh.status()
 
 
 
-
-
+//Check whenever it sharded
 mongo --host localhost --port 27011
 use students
 db.grades.find().sort({student_id:1}).limit(1).pretty()
@@ -79,11 +83,9 @@ use students
 db.grades.find().sort({student_id:1}).limit(1).pretty()
 db.grades.find().sort({student_id:-1}).limit(1).pretty()
 
+//Map Reduce on Sharded collection
+//Find the average score for each type
 
-use config
-db.settings.find()
-
-db.settings.save( { _id:"chunksize", value: 10 } )
 
 ###Write Concern
 

@@ -1,10 +1,4 @@
-
-1. Intro
-
-Get repository to C:\mongodb\scripts
-
-2. Run MongoDB
-Server
+1. Run MongoDB Server
 Download community edition 4.2 (zip) from off site 
 Unpack and add Bin to Paths
 
@@ -18,13 +12,20 @@ mkdir C:\mongodb\single\instance
 mongod --dbpath C:\mongodb\single\instance
 
 Using the config file
-cd C:\mongodb
-mkdir C:\mongodb\single\logs
-mongod -f C:\mongodb\scripts\singledb\singleShard.conf
 
-3. Create collection
+Switch directory to the repository
+cd C:\mongodb\scripts 
+
+mkdir C:\mongodb\single\logs
+mongod -f singledb\singleShard.conf
+
+2. Create collection
 
 Open Robo 3T
+Create Connection to localhost on port 27017 and connect
+
+Open Shell by right click on the Connection
+
 use singledb
 
 db.createCollection("users")
@@ -40,9 +41,11 @@ db.content.insertOne(
        authors:         ["Gray, L"],
        publicationDate: new Date("2018-04-03"),
        parentName:     "Educational Psychology in Practice",
-       volume:          NumberInt(34),
-       issue:           NumberInt(2),
-       pages:           {start:NumberInt(175), end:NumberInt(194)},
+       volume:           34 ,
+       issue:            2 ,
+       pages:           {
+           start:NumberInt(175),
+           end:NumberInt(194)},
        ids:             {doi: "10.1080/02667363.2018.1425829"},
        publisher:       "Routledge",
        abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
@@ -51,55 +54,61 @@ db.content.insertOne(
 
   
 //Insert many documents from Journals10
-load("C:/MongoDB/Scripts/journalsInsert.js")
+load("C:/MongoDB/Scripts2/journalsInsert.js")
 
 
-4. Search and Filters
+3. Search and Filters
 
-db.content.find( { type: "Journal" 
-, publisher : "Routledge"} )
+db.content.find({ 
+ type: "Journal",
+ publisher : "Routledge"})
 
-db.content.find({ type: "Journal" 
-, publisher : "Routledge"
-, parentName: "Educational Psychology in Practice"}).limit(2) 
+//Limit
+db.content.find({
+ type: "Journal",
+ publisher : "Routledge"}
+ ).limit(2) 
 
 //Greater
-db.content.find({ type: "Journal" 
-, publisher : "Routledge"
-, "pages.start":  {$gte: 454}
+db.content.find({
+ type: "Journal",
+ publisher : "Routledge",
+ "pages.start":  {$gte: 454}
 }) 
 
 
 //OR
- db.content.find({ type: "Journal" 
-, publisher : "Routledge"
-, $or : [ {"pages.start":{$gte: 454}} ,{"pages.start": {$lt:10}}]
- }
-)  
+db.content.find({
+ type: "Journal",
+ publisher : "Routledge",
+ $or : [
+	{"pages.start":{$gte: 454}},
+	{"pages.start": {$lt:10}}
+	]
+})
 
 //Take less fields
- db.content.find({parentName: "Educational Psychology in Practice"}
- ,{title: true, _id: false}) 
+db.content.find(
+ { parentName: "Educational Psychology in Practice" },
+ {title: true, _id: false})
  
-
-//Limit array 
-db.content.find ({ },{authors: {$slice : 1}})
 
 //Regexp
-db.content.find ({abstracts: {$regex:"teacher"}}) 
-db.content.find({abstracts:/teacher/i})
+db.content.find({abstracts: {$regex:"work"}}) 
+db.content.find({abstracts:/work/i})
  
-4.5 Update existing records
+ 
+4 Update existing records
 
 db.content.updateMany(
-   {
+	{
      publicationDate: { $exists: true },
-     publicationDate: { $type: "date" }},
-   [
-     { $set: { "publicationDates.print": "$publicationDate" }},
-     { $unset: "publicationDate"}
-   ],
-   {$currentDate: { lastModified: true }}   
+     publicationDate: { $type: "date" }
+	},  
+	[
+	 { $set: { "publicationDates.print": "$publicationDate" }},
+	 { $unset: "publicationDate"}
+	]  
 )
 
 
@@ -133,6 +142,20 @@ db.content.aggregate([
     $sort:{ _id : 1 }
   }
 ])
+
+db.content.aggregate([
+  {$match: {"pages.end": { $exists: true }}  },
+  {
+    $group: {
+      _id: "$publisher",
+      pages: { $sum :  { $subtract: [ "$pages.end", "$pages.start"  ]}} 
+    }
+  },
+  {
+    $sort:{ _id : 1 }
+  }
+])
+
    
 LINQ for IQueryable
 
@@ -205,13 +228,17 @@ for (var i = 1; i <= 1000; ++i) {
 7. Map/Reduce Functions 
 
 //Store and Load functions
- fn = function() { return this.name=="Tom"; }
- db.users.find(fn)
 
 function sqrt(n) { return n*n; }
   sqrt(5)
-  
-  
+ 
+fn = function() { return this.publisher == "Routledge"; }
+db.content.find(fn)
+
+
+//To load stored functions
+db.loadServerScripts();
+
 //Map/Reduce
 
 db.usersessions.insertMany([
