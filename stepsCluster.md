@@ -1,0 +1,121 @@
+
+mkdir c:\mongodb\Cluster\db\csrs1
+mkdir c:\mongodb\Cluster\db\csrs2
+mkdir c:\mongodb\Cluster\db\node1
+mkdir c:\mongodb\Cluster\db\node2
+mkdir c:\mongodb\Cluster\db\node3
+mkdir c:\mongodb\Cluster\db\mongoserver
+mkdir c:\mongodb\Cluster\logs
+
+cd c:\mongodb\scripts
+
+START /B mongod -f  cluster\csrs1.conf
+START /B mongod -f  cluster\csrs2.conf
+
+mongo --port 26001 -host localhost
+rs.initiate() 
+rs.add("localhost:26002")
+rs.status()
+exit
+ 
+
+START /B mongod -f   cluster\node1.conf
+START /B mongod -f   cluster\node2.conf
+START /B mongod -f   cluster\node3.conf
+
+
+START /B mongos -f  cluster\mongoserver.conf
+mongo --port 26000 -host localhost 
+sh.status()
+sh.addShard("localhost:27011")
+sh.addShard("localhost:27012")
+sh.addShard("localhost:27013")
+sh.status()
+use config 
+db.settings.insertOne( { _id:"chunksize", value:  5 } )
+exit
+
+// Run Robomongo Shell
+// Connetc to localhost:26000
+
+use students
+
+sh.enableSharding("students")
+
+//Starting in version 4.4, MongoDB removes the limit on the shard key size.
+//For MongoDB 4.2 and earlier, a shard key cannot exceed 512 bytes.
+
+sh.shardCollection("students.grades", {"student_id" : 1})
+
+sh.status()
+
+use students
+db.grades.createIndex( { student_id: 1 } );
+
+use students
+for ( i = 0; i < 10000; i++ ) {
+  db.grades.insert({student_id: i, type: "exam", score : Math.random() * 100 }); 
+  db.grades.insert({student_id: i, type: "quiz", score : Math.random() * 100 }); 
+  db.grades.insert({student_id: i, type: "homework", score : Math.random() * 100 });
+}
+
+
+//Check the speed in the new window
+mongostat --port 26000 
+
+
+db.grades.getShardDistribution()
+
+sh.startBalancer()
+
+sh.status()
+
+
+
+//Check whenever it sharded
+mongo --host localhost --port 27011
+use students
+db.grades.find().sort({student_id:1}).limit(1).pretty()
+db.grades.find().sort({student_id:-1}).limit(1).pretty()
+
+mongo --port 26000 --host localhost
+use students
+db.grades.find().sort({student_id:1}).limit(1).pretty()
+db.grades.find().sort({student_id:-1}).limit(1).pretty()
+
+//Map Reduce on Sharded collection
+//Find the average score for each type
+
+
+###Write Concern
+
+
+
+use config
+db.getCollection('actionlog').find({}).readConcern("linearizable").maxTimeMS(10000)
+
+//0, 1, majority
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: "majority" , wtimeout: 5000 } }
+)
+
+db.products.insert(
+   { item: "envelopes", qty : 100, type: "Clasp" },
+   { writeConcern: { w: 2, wtimeout: 5000 } }
+)
+ 
+ 
+Reads Concerns
+
+1. Stop mongos routers. 
+2. Stop each shard replica set. 
+3. Stop config servers.
+
+use admin
+db.shutdownServer()
+exit
+
+ 
+ 
