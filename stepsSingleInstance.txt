@@ -48,8 +48,9 @@ db.content.insertOne(
            end:NumberInt(194)},
        ids:             {doi: "10.1080/02667363.2018.1425829"},
        publisher:       "Routledge",
-       abstracts:        "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
-       createDate:      new Date()
+       abstracts:       "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
+       createDate:      new Date(),
+       price:           NumberDecimal("999999.4999999999")
 })
 
   
@@ -83,7 +84,7 @@ db.content.find({
  publisher : "Routledge",
  $or : [
 	{"pages.start":{$gte: 454}},
-	{"pages.start": {$lt:10}}
+	{"pages.start": {$lt:36}}
 	]
 })
 
@@ -117,10 +118,13 @@ db.content.updateMany(
 db.content.distinct("publisher")
 
 db.content.aggregate([
+  {$match: {"pages.end": { $exists: true }}},
   {
     $group: {
       _id: "$publisher",
-      sampleTitle: { $first : "$title" }
+      sampleTitle: { $first : "$title" },
+	  count: { $sum: 1 },
+	  pages: { $sum :  { $subtract: [ "$pages.end", "$pages.start"  ]}} 
     }
   },
   {
@@ -129,48 +133,20 @@ db.content.aggregate([
 ])
 
 
-db.content.aggregate([
-  {
-    $group: {
-      _id:   {"publisher": "$publisher",
-               "Parent": "$parentName"},
-      sample: { $first : "$title" },
-	  count: { $sum: 1 }
-    }
-  },
-  {
-    $sort:{ _id : 1 }
-  }
-])
-
-db.content.aggregate([
-  {$match: {"pages.end": { $exists: true }}  },
-  {
-    $group: {
-      _id: "$publisher",
-      pages: { $sum :  { $subtract: [ "$pages.end", "$pages.start"  ]}} 
-    }
-  },
-  {
-    $sort:{ _id : 1 }
-  }
-])
-
-   
 LINQ for IQueryable
 
 6. Indexes
  
-db.getCollection('content').find({title:/teacher/i})
-db.getCollection('content').find({title:/teacher/i}).explain()
+db.content.find({title:/teacher/i})
+db.content.find({title:/teacher/i}).explain()
  
 db.content.createIndex({"title" : 1}, {"unique" : false}) 
   
-db.getCollection('content').find({title:/teacher/i}).explain()
+db.content.find({title:/teacher/i}).explain()
   
    
 db.content.getIndexes()
-db.users.dropIndex("titile_1")
+db.content.dropIndex("titile_1")
   
 //Text index, Text Langueage  
 db.content.createIndex({"abstracts" : "text"} )
@@ -179,14 +155,12 @@ db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
  
 //Exact Phrase in quotas
  
-db.content.find( { $text: { $search: "\"an active listening\"" } } ) 
-db.content.find( { $text: { $search: "an active listening" } } ) 
- 
- 
+db.content.find( { $text: { $search: "\"an active listening\"" } } )
+
+
 //Term Exclusion
- 
-db.content.find( { $text: { $search: "adult learn -pain" } } )
- 
+db.content.find( { $text: { $search: "an active listening -work" } } ).count()
+
  
 //Sorting
 //To sort the results in order of relevance score, you must explicitly project the $meta textScore //field and sort on it:
@@ -202,7 +176,7 @@ db.content.find(
 db.content.aggregate(
    [
      { $match: { $text: { $search: "article learn" } } },
-     { $project: { title: 1, _id: 0, score: { $meta: "textScore" } } },
+     { $project: { score: { $meta: "textScore" } } },
      { $match: { score: { $gt: 1.0 } } }
    ]
 )
@@ -232,8 +206,10 @@ for (var i = 1; i <= 1000; ++i) {
 function sqrt(n) { return n*n; }
   sqrt(5)
  
-fn = function() { return this.publisher == "Routledge"; }
-db.content.find(fn)
+//Add function to the database
+//Name: checkPublisher
+function() { return this.publisher == "Routledge"; }
+db.content.find(checkPublisher)
 
 
 //To load stored functions
