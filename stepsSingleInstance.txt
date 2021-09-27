@@ -1,17 +1,16 @@
 1. Run MongoDB Server
 Download community edition 4.2 (zip) from off site 
-Unpack and add Bin to Paths
+Unpack and add the Bin folder to Paths
 
-Client
-Download and install Robo 3T only
+Client: Download and install Robo 3T only
 
-Run mongod by command
-
-
+1.1 Run mongod by command
+Create the folder to store data
 mkdir C:\mongodb\single\instance
+
 mongod --dbpath C:\mongodb\single\instance
 
-Using the config file
+1.2 Run using the config file
 
 Switch directory to the repository
 cd C:\mongodb\scripts 
@@ -49,13 +48,12 @@ db.content.insertOne(
        ids:             {doi: "10.1080/02667363.2018.1425829"},
        publisher:       "Routledge",
        abstracts:       "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
-       createDate:      new Date(),
-       price:           NumberDecimal("999999.4999999999")
+       createDate:      new Date()
 })
 
   
 //Insert many documents from Journals10
-load("C:/MongoDB/Scripts2/journalsInsert.js")
+load("C:/MongoDB/Scripts/journalsInsert.js")
 
 
 3. Search and Filters
