@@ -51,7 +51,7 @@ db.content.insertOne(
   
  Insert many documents from Journals10
  
-	load("C:/MongoDB/Scripts2/journalsInsert.js")
+	load("C:/MongoDB/Scripts/journalsInsert.js")
 
 
 ## Search and Filters

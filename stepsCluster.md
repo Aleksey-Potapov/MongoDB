@@ -41,7 +41,6 @@ exit
 sh.status()
 sh.addShard("localhost:27011")
 sh.addShard("localhost:27012")
-sh.addShard("localhost:27013")
 sh.status()
 ```
 **Adjust chunk size**
@@ -80,6 +79,13 @@ for ( i = 0; i < 10000; i++ ) {
  ```javascript
 db.grades.getShardDistribution()
 sh.startBalancer()
+sh.status()
+```
+
+**Add third shard and run the script again**
+
+```javascript
+sh.addShard("localhost:27013")
 sh.status()
 ```
 
