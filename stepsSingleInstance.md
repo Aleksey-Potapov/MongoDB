@@ -1,39 +1,34 @@
-1. Run MongoDB Server
-Download community edition 4.2 (zip) from off site 
-Unpack and add Bin to Paths
-
-Client
-Download and install Robo 3T only
-
-Run mongod by command
+# MongoDB. Single server 
 
 
-mkdir C:\mongodb\single\instance
-mongod --dbpath C:\mongodb\single\instance
+- Download community edition 4.2 (zip) from off site 
+- Unpack and add Bin to Paths
+- Download and install Client Robo 3T only
 
-Using the config file
 
-Switch directory to the repository
-cd C:\mongodb\scripts 
+### Run mongod by command
 
-mkdir C:\mongodb\single\logs
-mongod -f singledb\singleShard.conf
+	mkdir C:\mongodb\single\instance
+	mongod --dbpath C:\mongodb\single\instance
 
-2. Create collection
+### Using the config file
+
+	cd C:\mongodb\scripts 
+	mkdir C:\mongodb\single\logs
+	mongod -f singledb\singleShard.conf
+
+
+## Create collection
 
 Open Robo 3T
 Create Connection to localhost on port 27017 and connect
-
 Open Shell by right click on the Connection
 
-use singledb
-
-db.createCollection("users")
-
-db.users.renameCollection("user")
-
-db.user.insertOne( { name: "Workshop" } )
-
+	use singledb
+	db.createCollection("users")
+	db.users.renameCollection("user")
+	db.user.insertOne( { name: "Workshop" } )
+```javascript
 db.content.insertOne(
    { 
        type:            "Journal",
@@ -49,94 +44,97 @@ db.content.insertOne(
        ids:             {doi: "10.1080/02667363.2018.1425829"},
        publisher:       "Routledge",
        abstracts:       "Upcoming statutory UK government guidance for keeping children safe in education reflects the use of social media, which is one of the most common activities undertaken by young people.",
-       createDate:      new Date(),
-       price:           NumberDecimal("999999.4999999999")
+       createDate:      new Date()
 })
-
+``` 
   
-//Insert many documents from Journals10
-load("C:/MongoDB/Scripts2/journalsInsert.js")
-
-
-3. Search and Filters
-
-db.content.find({ 
- type: "Journal",
- publisher : "Routledge"})
-
-//Limit
-db.content.find({
- type: "Journal",
- publisher : "Routledge"}
- ).limit(2) 
-
-//Greater
-db.content.find({
- type: "Journal",
- publisher : "Routledge",
- "pages.start":  {$gte: 454}
-}) 
-
-
-//OR
-db.content.find({
- type: "Journal",
- publisher : "Routledge",
- $or : [
-	{"pages.start":{$gte: 454}},
-	{"pages.start": {$lt:36}}
-	]
-})
-
-//Take less fields
-db.content.find(
- { parentName: "Educational Psychology in Practice" },
- {title: true, _id: false})
+  
+ Insert many documents from Journals10
  
-
-//Regexp
-db.content.find({abstracts: {$regex:"work"}}) 
-db.content.find({abstracts:/work/i})
- 
- 
-4 Update existing records
-
-db.content.updateMany(
-	{
-     publicationDate: { $exists: true },
-     publicationDate: { $type: "date" }
-	},  
-	[
-	 { $set: { "publicationDates.print": "$publicationDate" }},
-	 { $unset: "publicationDate"}
-	]  
-)
+	load("C:/MongoDB/Scripts2/journalsInsert.js")
 
 
-5 Groups and Aggregation
+## Search and Filters
+ ```javascript
+	db.content.find({ 
+	 type: "Journal",
+	 publisher : "Routledge"})
+```
 
-db.content.distinct("publisher")
+**Limit**
+ ```javascript
+	db.content.find({
+	 type: "Journal",
+	 publisher : "Routledge"}
+	 ).limit(2) 
+```
+**Greater**
+ ```javascript
+	db.content.find({
+	 type: "Journal",
+	 publisher : "Routledge",
+	 "pages.start":  {$gte: 454}
+	}) 
+```
+**OR** 
+ ```javascript
+	db.content.find({
+	 type: "Journal",
+	 publisher : "Routledge",
+	 $or : [
+		{"pages.start":{$gte: 454}},
+		{"pages.start": {$lt:36}}
+		]
+	})
+```
+**Take less fields**
+ ```javascript
+	db.content.find(
+	 { parentName: "Educational Psychology in Practice" },
+	 {title: true, _id: false})
+ ```
 
-db.content.aggregate([
-  {$match: {"pages.end": { $exists: true }}},
-  {
-    $group: {
-      _id: "$publisher",
-      sampleTitle: { $first : "$title" },
-	  count: { $sum: 1 },
-	  pages: { $sum :  { $subtract: [ "$pages.end", "$pages.start"  ]}} 
-    }
-  },
-  {
-    $sort:{ _id : 1 }
-  }
-])
+**Regexp**
+ ```javascript
+	db.content.find({abstracts: {$regex:"work"}}) 
+	db.content.find({abstracts:/work/}) 
+ ```
+## Update existing records
+ ```javascript
+	db.content.updateMany(
+		{
+	     publicationDate: { $exists: true },
+	     publicationDate: { $type: "date" }
+		},  
+		[
+		 { $set: { "publicationDates.print": "$publicationDate" }},
+		 { $unset: "publicationDate"}
+		]  
+	)
+```
 
+## Aggregation
+ ```javascript
+	db.content.distinct("publisher")
 
-LINQ for IQueryable
+	db.content.aggregate([
+	  { $match: {"pages.end": { $exists: true }}},
+	  { 
+	    $group: {
+	      _id: "$publisher",
+	      sampleTitle: { $first : "$title" },
+          count: { $sum: 1 },
+          pages: { $sum :  { $subtract: [ "$pages.end", "$pages.start"  ]}} 
+	    }
+	  },
+	  { 
+	   $sort:{ _id : 1 }
+	  }
+	])
+ ```
 
-6. Indexes
- 
+## Indexes
+  ```javascript
 db.content.find({title:/teacher/i})
 db.content.find({title:/teacher/i}).explain()
  
@@ -147,30 +145,27 @@ db.content.find({title:/teacher/i}).explain()
    
 db.content.getIndexes()
 db.content.dropIndex("titile_1")
-  
-//Text index, Text Langueage  
-db.content.createIndex({"abstracts" : "text"} )
-  
-db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
- 
-//Exact Phrase in quotas
- 
-db.content.find( { $text: { $search: "\"an active listening\"" } } )
+```
 
+**Text index**
+
+ ```javascript
+db.content.createIndex({"abstracts" : "text"} )
+db.content.find( { $text: { $search: "adults or and teacher’s" } } ).explain()
+
+//Exact Phrase in quotas
+db.content.find( { $text: { $search: "\"an active listening\"" } } )
 
 //Term Exclusion
 db.content.find( { $text: { $search: "an active listening -work" } } ).count()
 
- 
 //Sorting
 //To sort the results in order of relevance score, you must explicitly project the $meta textScore //field and sort on it:
-
 
 db.content.find(
    { $text: { $search: "article learn" } },
    { score: { $meta: "textScore" } }
 ).sort( { score: { $meta: "textScore" } } )
-
 
 //Take only best match
 db.content.aggregate(
@@ -183,10 +178,10 @@ db.content.aggregate(
 
 //Check the indexes usage.
 db.content.aggregate( [ { $indexStats: { } } ] )
+```
 
- 
- 
-//Capped Collections
+### Capped Collections
+ ```javascript
 db.createCollection("logs", {capped:true, size:9500, max: 150})
  
  
@@ -196,13 +191,12 @@ for (var i = 1; i <= 1000; ++i) {
       uid: i
   });
 }
+```
 
 
-
-7. Map/Reduce Functions 
-
+## Map/Reduce Functions 
+ ```javascript
 //Store and Load functions
-
 function sqrt(n) { return n*n; }
   sqrt(5)
  
@@ -211,12 +205,10 @@ function sqrt(n) { return n*n; }
 function() { return this.publisher == "Routledge"; }
 db.content.find(checkPublisher)
 
-
 //To load stored functions
 db.loadServerScripts();
 
-//Map/Reduce
-
+//Add some data
 db.usersessions.insertMany([
    { userid: "a", start: ISODate('2020-03-03 14:17:00'), length: 95 },
    { userid: "b", start: ISODate('2020-03-03 14:23:00'), length: 110 },
@@ -236,7 +228,6 @@ var mapFunction = function() {
 };
 
 //Reduce
-
 var reduceFunction = function(key, values) {
    var reducedObject = { total_time: 0, count:0, avg_time:0 };
    values.forEach(function(value) {
@@ -280,8 +271,6 @@ db.usersessions.mapReduce(
    }
 );
 
-
-
 db.usersessions.aggregate([
   // { $match: { ts: { $gte: ISODate('2020-03-05 00:00:00') } } },
    { $group: { _id: "$userid", total_time: { $sum: "$length" }, count: { $sum: 1 }, avg_time: { $avg: "$length" } } },
@@ -296,23 +285,22 @@ db.usersessions.aggregate([
       whenNotMatched: "insert"
    }}
 ])
-
+```
 
 
  
-99. Utils
+## Utils
 
-Check perfomance 
-mongostat --port 27017
+	mongostat --port 27017
 
-mkdir c:\mongodb\backup
-cd c:\mongodb\backup
-mongodump --port 27017 --db singledb --collection content
-mongorestore --drop --port 27017 dump/
+	mkdir c:\mongodb\backup
+	cd c:\mongodb\backup
+	mongodump --port 27017 --db singledb --collection content
+	mongorestore --drop --port 27017 dump/
 
 
-mongoexport --port 27017 --db singledb --collection content -o content.json
-mongoimport --port 27017 content.json
+	mongoexport --port 27017 --db singledb --collection content -o content.json
+	mongoimport --port 27017 content.json
 
- 
+	 
 
