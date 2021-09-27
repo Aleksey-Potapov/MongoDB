@@ -57,12 +57,11 @@ exit
  ```javascript
 use students
 sh.enableSharding("students")
+db.grades.createIndex( { student_id: 1 } );
+
 sh.shardCollection("students.grades", {"student_id" : 1})
 
 sh.status()
-
-use students
-db.grades.createIndex( { student_id: 1 } );
 
 use students
 for ( i = 0; i < 10000; i++ ) {
